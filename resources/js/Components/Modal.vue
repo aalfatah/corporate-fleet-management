@@ -69,13 +69,13 @@ const maxWidthClass = {
             >
                 <!-- Backdrop -->
                 <div
-                    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+                    class="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity"
                     @click="close"
                 ></div>
 
                 <!-- Modal Content Box -->
                 <div
-                    class="relative z-10 w-full rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl transition-all transform"
+                    class="relative z-10 w-full rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 shadow-xl transition-all transform"
                     :class="maxWidthClass"
                 >
                     <slot />
