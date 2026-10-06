@@ -44,10 +44,12 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $user ? [
-                    'id'            => $user->id,
-                    'name'          => $user->name,
-                    'email'         => $user->email,
-                    'avatar'        => $user->avatar,
+                    'id'                   => $user->id,
+                    'name'                 => $user->name,
+                    'email'                => $user->email,
+                    'avatar'               => $user->avatar,
+                    'phone'                => $user->phone,
+                    'must_change_password' => $user->must_change_password,
                     'role'          => $user->role ? [
                         'id'   => $user->role->id,
                         'name' => $user->role->name,

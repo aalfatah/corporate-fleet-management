@@ -4,7 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TripLogController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,8 +23,13 @@ Route::middleware('guest')->group(function () {
 });
 
 // Authenticated Routes
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'force.password'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // ── Profile (Self-service for all roles) ────────────────────────────────
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::match(['put', 'post'], '/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('home');
@@ -67,9 +74,19 @@ Route::middleware('auth')->group(function () {
         Route::delete('/drivers/{driver}', [DriverController::class, 'destroy'])->name('drivers.destroy');
     });
 
+    // ── User Management (Super Admin Only) ───────────────────────────────────
+    Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+    });
+
     // ── Driver Trip Lifecycle ────────────────────────────────────────────────
     Route::middleware('role:driver')->group(function () {
         Route::post('/trips/{booking}/start', [TripLogController::class, 'startTrip'])->name('trips.start');
         Route::post('/trips/{booking}/complete', [TripLogController::class, 'completeTrip'])->name('trips.complete');
     });
 });
+

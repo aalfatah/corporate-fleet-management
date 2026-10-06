@@ -16,7 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'role'           => \App\Http\Middleware\EnsureUserHasRole::class,
+            'force.password' => \App\Http\Middleware\ForceChangePassword::class,
         ]);
 
         // Cloudflare Tunneling Configuration
