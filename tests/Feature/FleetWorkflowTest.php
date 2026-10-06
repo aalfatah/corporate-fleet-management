@@ -42,7 +42,7 @@ class FleetWorkflowTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $booking = Booking::where('destination', 'KCC Factory Batang Plant')->first();
+        $booking = Booking::where('destination', 'KCC Factory Batang Plant')->latest()->first();
         $this->assertNotNull($booking);
         $this->assertEquals(Booking::STATUS_PENDING_APPROVAL, $booking->status);
 
