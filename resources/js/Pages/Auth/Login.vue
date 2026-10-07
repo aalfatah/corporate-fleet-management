@@ -4,15 +4,21 @@ import { useForm, Head } from '@inertiajs/vue3';
 import { Car, Lock, Mail, ShieldAlert, ArrowRight, Sun, Moon } from 'lucide-vue-next';
 
 const form = useForm({
-    email: 'superadmin@fleet.local',
-    password: 'Admin@1234!',
-    remember: true,
+    email: '',
+    password: '',
+    remember: false,
 });
 
 const isDark = ref(false);
 
 onMounted(() => {
     isDark.value = document.documentElement.classList.contains('dark');
+    const savedEmail = localStorage.getItem('kcc_remembered_email');
+    const savedRemember = localStorage.getItem('kcc_remember_me');
+    if (savedEmail && savedRemember === 'true') {
+        form.email = savedEmail;
+        form.remember = true;
+    }
 });
 
 const toggleTheme = () => {
@@ -27,6 +33,14 @@ const toggleTheme = () => {
 };
 
 const submit = () => {
+    if (form.remember) {
+        localStorage.setItem('kcc_remembered_email', form.email);
+        localStorage.setItem('kcc_remember_me', 'true');
+    } else {
+        localStorage.removeItem('kcc_remembered_email');
+        localStorage.removeItem('kcc_remember_me');
+    }
+
     form.post('/login', {
         onFinish: () => form.reset('password'),
     });

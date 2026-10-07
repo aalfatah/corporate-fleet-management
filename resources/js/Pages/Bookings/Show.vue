@@ -78,12 +78,18 @@ const approve = () => {
     }
 };
 
-// Assignment Modal (Admin)
+// Assignment Modal (Admin & PIC)
 const showAssignModal = ref(false);
 const assignForm = ref({
     driver_id: props.booking.driver_id || '',
     vehicle_id: props.booking.vehicle_id || '',
 });
+
+const openAssignModal = () => {
+    assignForm.value.driver_id = props.booking.driver_id || '';
+    assignForm.value.vehicle_id = props.booking.vehicle_id || '';
+    showAssignModal.value = true;
+};
 
 const submitAssign = () => {
     if (!assignForm.value.driver_id) {
@@ -304,7 +310,7 @@ const formatDate = (dateStr) => {
                                 </div>
                             </div>
                             <div v-else class="text-slate-400 italic mt-1">
-                                Driver will be assigned by Administrator upon approval.
+                                Driver will be assigned by PIC or Administrator upon approval.
                             </div>
                         </div>
 
@@ -316,7 +322,9 @@ const formatDate = (dateStr) => {
                             </div>
                             <div>
                                 <span class="block text-[10px] uppercase font-bold">PIC Approver</span>
-                                <span class="text-slate-900 dark:text-white font-semibold">{{ booking.manager?.name }}</span>
+                                <span class="text-slate-900 dark:text-white font-semibold">
+                                    {{ booking.manager?.name || 'Pending Approval (All PICs)' }}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -374,8 +382,8 @@ const formatDate = (dateStr) => {
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <!-- PIC / Approver Actions -->
-                    <template v-if="booking.status === 'pending_approval' && (booking.manager_id === user?.id || roleSlug === 'super_admin' || roleSlug === 'pic')">
+                    <!-- PIC / Approver Actions (Any PIC or Super Admin can approve) -->
+                    <template v-if="booking.status === 'pending_approval' && (roleSlug === 'super_admin' || roleSlug === 'pic')">
                         <button
                             @click="approve"
                             class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium text-xs flex items-center gap-1.5 transition-colors"
@@ -390,10 +398,10 @@ const formatDate = (dateStr) => {
                         </button>
                     </template>
 
-                    <!-- Super Admin Assign Driver & Vehicle -->
-                    <template v-if="['approved', 'assigned'].includes(booking.status) && roleSlug === 'super_admin'">
+                    <!-- Super Admin & PIC Assign Driver & Vehicle -->
+                    <template v-if="['approved', 'assigned'].includes(booking.status) && (roleSlug === 'super_admin' || roleSlug === 'pic')">
                         <button
-                            @click="showAssignModal = true"
+                            @click="openAssignModal"
                             class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs flex items-center gap-1.5 transition-colors"
                         >
                             <UserCheck class="h-4 w-4" />
@@ -467,15 +475,17 @@ const formatDate = (dateStr) => {
             </div>
         </Modal>
 
-        <!-- ASSIGN MODAL (ADMIN) -->
+        <!-- ASSIGN / REASSIGN MODAL (ADMIN & PIC) -->
         <Modal :show="showAssignModal" @close="showAssignModal = false" maxWidth="md">
             <div class="space-y-4">
                 <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                     <UserCheck class="h-5 w-5 shrink-0" />
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Assign Driver & Confirm Vehicle</h3>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                        {{ booking.status === 'assigned' ? 'Reassign Driver / Vehicle' : 'Assign Driver & Confirm Vehicle' }}
+                    </h3>
                 </div>
                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Dispatch an available driver from the pool for this trip.
+                    {{ booking.status === 'assigned' ? 'Select a replacement driver from the available fleet pool.' : 'Dispatch an available driver from the pool for this trip.' }}
                 </p>
 
                 <div class="space-y-3 text-xs">
@@ -492,7 +502,7 @@ const formatDate = (dateStr) => {
                                 :key="d.id"
                                 :value="d.id"
                             >
-                                {{ d.user?.name }} (License: {{ d.license_number }})
+                                {{ d.user?.name }} (License: {{ d.license_number }}){{ d.id === booking.driver_id ? ' — [Currently Assigned]' : '' }}
                             </option>
                         </select>
                     </div>
@@ -512,7 +522,7 @@ const formatDate = (dateStr) => {
                         @click="submitAssign"
                         class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium disabled:opacity-50 transition-colors"
                     >
-                        Confirm Assignment
+                        {{ booking.status === 'assigned' ? 'Confirm Reassignment' : 'Confirm Assignment' }}
                     </button>
                 </div>
             </div>

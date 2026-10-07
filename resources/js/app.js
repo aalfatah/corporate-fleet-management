@@ -35,7 +35,7 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        color: '#6366f1', // Indigo-500
+        color: '#2563eb', // Blue-600 Corporate Brand
         showSpinner: true,
     },
 });

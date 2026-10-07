@@ -22,8 +22,8 @@ class UserManagementTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::where('email', 'superadmin@fleet.local')->firstOrFail();
-        $this->employee = User::where('email', 'budi.santoso@fleet.local')->firstOrFail();
+        $this->admin = User::whereHas('role', fn ($q) => $q->where('slug', Role::SUPER_ADMIN))->firstOrFail();
+        $this->employee = User::whereHas('role', fn ($q) => $q->where('slug', Role::EMPLOYEE))->firstOrFail();
         $this->employeeRole = Role::where('slug', Role::EMPLOYEE)->firstOrFail();
         $this->picRole = Role::where('slug', Role::PIC)->firstOrFail();
         $this->department = Department::firstOrFail();

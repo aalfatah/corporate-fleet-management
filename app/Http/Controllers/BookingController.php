@@ -38,7 +38,7 @@ class BookingController extends Controller
         if ($roleSlug === 'employee') {
             $query->forEmployee($user->id);
         } elseif ($roleSlug === 'pic') {
-            $query->forManager($user->id);
+            // PIC has fleet-wide approval & assignment oversight to prevent workflow bottlenecks
         } elseif ($roleSlug === 'driver') {
             $driver = $user->driver;
             if ($driver) {
@@ -105,12 +105,14 @@ class BookingController extends Controller
     {
         $booking->load(['employee.department', 'manager', 'vehicle', 'driver.user', 'tripLog']);
 
-        // Available active drivers for assignment (if user is admin)
+        // Available active drivers for assignment (if user is Super Admin or PIC)
+        $user = auth()->user();
         $availableDrivers = [];
-        if (auth()->user()->isSuperAdmin() && in_array($booking->status, [Booking::STATUS_APPROVED, Booking::STATUS_ASSIGNED])) {
+        if (($user->isSuperAdmin() || $user->isPic()) && in_array($booking->status, [Booking::STATUS_APPROVED, Booking::STATUS_ASSIGNED])) {
             $availableDrivers = Driver::availableFor(
                 $booking->start_time->toDateTimeString(),
-                $booking->end_time->toDateTimeString()
+                $booking->end_time->toDateTimeString(),
+                $booking->id
             )->with('user')->get();
         }
 
@@ -147,14 +149,15 @@ class BookingController extends Controller
     }
 
     /**
-     * Assign a driver and vehicle to an approved booking (Super Admin).
+     * Assign a driver and vehicle to an approved booking (Super Admin / PIC).
      */
     public function assign(AssignDriverRequest $request, Booking $booking): RedirectResponse
     {
         $this->bookingService->assignDriverAndVehicle(
             $booking,
             $request->validated('driver_id'),
-            $request->validated('vehicle_id')
+            $request->validated('vehicle_id'),
+            $request->user()
         );
 
         return redirect()->back()

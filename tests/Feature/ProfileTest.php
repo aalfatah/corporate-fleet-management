@@ -20,7 +20,7 @@ class ProfileTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = User::where('email', 'budi.santoso@fleet.local')->firstOrFail();
+        $this->user = User::whereHas('role', fn ($q) => $q->where('slug', Role::EMPLOYEE))->firstOrFail();
     }
 
     public function test_authenticated_user_can_view_profile_page(): void

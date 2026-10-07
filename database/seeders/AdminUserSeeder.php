@@ -16,9 +16,9 @@ class AdminUserSeeder extends Seeder
         $itDept = Department::where('code', 'IT')->firstOrFail();
 
         User::firstOrCreate(
-            ['email' => 'superadmin@fleet.local'],
+            ['email' => 'ahmat.alfatah@homecc.com'],
             [
-                'name' => 'Super Administrator',
+                'name' => 'Ahmat Alfatah',
                 'password' => Hash::make('Admin@1234!'),
                 'role_id' => $superAdminRole->id,
                 'department_id' => $itDept->id,

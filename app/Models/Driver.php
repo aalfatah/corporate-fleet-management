@@ -50,7 +50,7 @@ class Driver extends Model
      * A driver is considered occupied if they are in an 'assigned' or
      * 'in_progress' booking that overlaps with the requested slot.
      */
-    public function scopeAvailableFor(Builder $query, string $startTime, string $endTime): Builder
+    public function scopeAvailableFor(Builder $query, string $startTime, string $endTime, ?string $excludeBookingId = null): Builder
     {
         $blockedStatuses = [
             Booking::STATUS_ASSIGNED,
@@ -59,7 +59,7 @@ class Driver extends Model
 
         return $query
             ->where('is_active', true)
-            ->whereNotIn('id', function ($sub) use ($blockedStatuses, $startTime, $endTime) {
+            ->whereNotIn('id', function ($sub) use ($blockedStatuses, $startTime, $endTime, $excludeBookingId) {
                 $sub->select('driver_id')
                     ->from('bookings')
                     ->whereIn('status', $blockedStatuses)
@@ -67,6 +67,10 @@ class Driver extends Model
                     ->whereNull('deleted_at')
                     ->where('start_time', '<', $endTime)
                     ->where('end_time', '>', $startTime);
+
+                if ($excludeBookingId) {
+                    $sub->where('id', '!=', $excludeBookingId);
+                }
             });
     }
 

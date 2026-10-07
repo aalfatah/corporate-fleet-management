@@ -26,9 +26,9 @@ class DemoDataSeeder extends Seeder
 
         // 1. PIC User
         $picUser = User::firstOrCreate(
-            ['email' => 'pic.manager@fleet.local'],
+            ['email' => 'afdiadw@homecc.com'],
             [
-                'name'          => 'Hendra Wijaya (PIC)',
+                'name'          => 'Afdia Dwi Wulandari',
                 'password'      => Hash::make('Password@123'),
                 'role_id'       => $picRole->id,
                 'department_id' => $hrDept->id,
@@ -39,9 +39,9 @@ class DemoDataSeeder extends Seeder
 
         // 2. Employee User (reports to PIC)
         $employeeUser = User::firstOrCreate(
-            ['email' => 'budi.santoso@fleet.local'],
+            ['email' => 'khansa@homecc.com'],
             [
-                'name'          => 'Budi Santoso',
+                'name'          => 'Khansa Salsabila Afaf',
                 'password'      => Hash::make('Password@123'),
                 'role_id'       => $employeeRole->id,
                 'department_id' => $hrDept->id,
@@ -52,9 +52,9 @@ class DemoDataSeeder extends Seeder
 
         // 3. Driver Users & Driver Profiles
         $driverUser1 = User::firstOrCreate(
-            ['email' => 'joko.driver@fleet.local'],
+            ['email' => 'kholis@homecc.com'],
             [
-                'name'          => 'Joko Susilo',
+                'name'          => 'Kholis',
                 'password'      => Hash::make('Password@123'),
                 'role_id'       => $driverRole->id,
                 'department_id' => $opsDept->id,
@@ -73,9 +73,9 @@ class DemoDataSeeder extends Seeder
         );
 
         $driverUser2 = User::firstOrCreate(
-            ['email' => 'agus.driver@fleet.local'],
+            ['email' => 'suroso@homecc.com'],
             [
-                'name'          => 'Agus Pratama',
+                'name'          => 'Suroso',
                 'password'      => Hash::make('Password@123'),
                 'role_id'       => $driverRole->id,
                 'department_id' => $opsDept->id,

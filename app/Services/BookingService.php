@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Events\BookingStatusUpdated;
+use App\Events\TripAssignedEvent;
 use App\Models\Booking;
 use App\Models\Driver;
 use App\Models\TripLog;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Notifications\TripAssignedNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -52,13 +54,8 @@ class BookingService
                 ]);
             }
 
-            // 3. Resolve manager/approver ID
-            $managerId = $data['manager_id'] ?? $employee->manager_id;
-            if (! $managerId) {
-                throw ValidationException::withMessages([
-                    'manager_id' => 'No approving manager is configured for this employee.',
-                ]);
-            }
+            // 3. Resolve manager/approver ID (optional on creation; any PIC can approve later)
+            $managerId = $data['manager_id'] ?? $employee->manager_id ?? null;
 
             // 4. Create booking
             $booking = Booking::create([
@@ -86,7 +83,7 @@ class BookingService
      */
     public function approveBooking(Booking $booking, User $approver): Booking
     {
-        return DB::transaction(function () use ($booking) {
+        return DB::transaction(function () use ($booking, $approver) {
             $lockedBooking = Booking::where('id', $booking->id)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -94,7 +91,8 @@ class BookingService
             $this->assertCanTransition($lockedBooking, Booking::STATUS_APPROVED);
 
             $lockedBooking->update([
-                'status' => Booking::STATUS_APPROVED,
+                'status'     => Booking::STATUS_APPROVED,
+                'manager_id' => $approver->id,
             ]);
 
             event(new BookingStatusUpdated($lockedBooking));
@@ -109,7 +107,7 @@ class BookingService
      */
     public function rejectBooking(Booking $booking, User $approver, string $reason): Booking
     {
-        return DB::transaction(function () use ($booking, $reason) {
+        return DB::transaction(function () use ($booking, $approver, $reason) {
             $lockedBooking = Booking::where('id', $booking->id)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -118,6 +116,7 @@ class BookingService
 
             $lockedBooking->update([
                 'status'           => Booking::STATUS_REJECTED,
+                'manager_id'       => $approver->id,
                 'rejection_reason' => $reason,
             ]);
 
@@ -133,9 +132,9 @@ class BookingService
      *
      * Locks both the booking and the driver record to prevent double-assignment.
      */
-    public function assignDriverAndVehicle(Booking $booking, string $driverId, ?string $vehicleId = null): Booking
+    public function assignDriverAndVehicle(Booking $booking, string $driverId, ?string $vehicleId = null, ?User $assigner = null): Booking
     {
-        return DB::transaction(function () use ($booking, $driverId, $vehicleId) {
+        return DB::transaction(function () use ($booking, $driverId, $vehicleId, $assigner) {
             $lockedBooking = Booking::where('id', $booking->id)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -190,6 +189,18 @@ class BookingService
                 ]);
             }
 
+            $oldVehicleId = $lockedBooking->vehicle_id;
+            if ($oldVehicleId && $oldVehicleId !== $vehicle->id) {
+                $hasOtherActive = Booking::query()
+                    ->where('vehicle_id', $oldVehicleId)
+                    ->whereIn('status', [Booking::STATUS_ASSIGNED, Booking::STATUS_IN_PROGRESS])
+                    ->where('id', '!=', $lockedBooking->id)
+                    ->exists();
+                if (! $hasOtherActive) {
+                    Vehicle::where('id', $oldVehicleId)->update(['current_status' => Vehicle::STATUS_AVAILABLE]);
+                }
+            }
+
             $lockedBooking->update([
                 'driver_id'  => $driver->id,
                 'vehicle_id' => $vehicle->id,
@@ -198,6 +209,17 @@ class BookingService
 
             $vehicle->update(['current_status' => Vehicle::STATUS_IN_USE]);
 
+            $lockedBooking->load(['employee.department', 'vehicle', 'driver.user']);
+
+            // 1. Send Database & Broadcast Notification to Driver's User
+            if ($driver->user) {
+                $driver->user->notify(new TripAssignedNotification($lockedBooking, $driver, $assigner ?? auth()->user()));
+            }
+
+            // 2. Broadcast dedicated real-time event for driver pop-up
+            event(new TripAssignedEvent($lockedBooking, $driver));
+
+            // 3. Broadcast status update to fleet channels
             event(new BookingStatusUpdated($lockedBooking));
 
             return $lockedBooking;

@@ -40,7 +40,11 @@ class Booking extends Model
             self::STATUS_CANCELLED,
         ],
         self::STATUS_APPROVED  => [self::STATUS_ASSIGNED, self::STATUS_CANCELLED],
-        self::STATUS_ASSIGNED  => [self::STATUS_IN_PROGRESS],
+        self::STATUS_ASSIGNED  => [
+            self::STATUS_IN_PROGRESS,
+            self::STATUS_ASSIGNED, // Reassign driver or car before trip begins
+            self::STATUS_CANCELLED,
+        ],
         self::STATUS_IN_PROGRESS => [self::STATUS_COMPLETED],
         self::STATUS_COMPLETED => [],
         self::STATUS_REJECTED  => [],
