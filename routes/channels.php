@@ -10,3 +10,7 @@ Broadcast::channel('bookings', function (User $user) {
 Broadcast::channel('user.{id}', function (User $user, string $id) {
     return $user->id === $id || $user->isSuperAdmin();
 });
+
+Broadcast::channel('driver.{id}', function (User $user, string $id) {
+    return $user->driver?->id === $id || $user->isSuperAdmin();
+});

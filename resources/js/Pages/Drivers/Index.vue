@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import {
@@ -10,6 +10,10 @@ import {
     ChevronRight,
     X
 } from 'lucide-vue-next';
+
+const page = usePage();
+const currentUser = computed(() => page.props.auth?.user);
+const isSuperAdmin = computed(() => currentUser.value?.role?.slug === 'super_admin');
 
 const props = defineProps({
     drivers: {
@@ -73,7 +77,7 @@ const formatDate = (dateStr) => {
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage designated drivers, licenses, and availability</p>
                 </div>
 
-                <div>
+                <div v-if="isSuperAdmin">
                     <button
                         @click="showCreateModal = true"
                         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-colors"

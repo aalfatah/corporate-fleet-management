@@ -9,7 +9,7 @@ class StoreBookingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() && ($this->user()->isEmployee() || $this->user()->isSuperAdmin());
+        return $this->user() && ($this->user()->isEmployee() || $this->user()->isSuperAdmin() || $this->user()->isPic());
     }
 
     public function rules(): array

@@ -5,6 +5,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TripLogController;
 use App\Http\Controllers\UserController;
@@ -49,8 +50,8 @@ Route::middleware(['auth', 'force.password'])->group(function () {
         Route::post('/bookings/{booking}/reject', [BookingController::class, 'reject'])->name('bookings.reject');
     });
 
-    // Super Admin Booking Assignment
-    Route::middleware('role:super_admin')->group(function () {
+    // Booking Assignment (PIC & Super Admin)
+    Route::middleware('role:super_admin,pic')->group(function () {
         Route::post('/bookings/{booking}/assign', [BookingController::class, 'assign'])->name('bookings.assign');
     });
 
@@ -66,11 +67,15 @@ Route::middleware(['auth', 'force.password'])->group(function () {
         Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
     });
 
-    // ── Drivers (Super Admin Only) ───────────────────────────────────────────
-    Route::middleware('role:super_admin')->group(function () {
+    // ── Drivers (Super Admin & PIC Directory View) ───────────────────────────
+    Route::middleware('role:super_admin,pic')->group(function () {
         Route::get('/drivers', [DriverController::class, 'index'])->name('drivers.index');
-        Route::post('/drivers', [DriverController::class, 'store'])->name('drivers.store');
         Route::get('/drivers/{driver}', [DriverController::class, 'show'])->name('drivers.show');
+    });
+
+    // Super Admin Driver Profile Management
+    Route::middleware('role:super_admin')->group(function () {
+        Route::post('/drivers', [DriverController::class, 'store'])->name('drivers.store');
         Route::put('/drivers/{driver}', [DriverController::class, 'update'])->name('drivers.update');
         Route::delete('/drivers/{driver}', [DriverController::class, 'destroy'])->name('drivers.destroy');
     });
@@ -92,6 +97,12 @@ Route::middleware(['auth', 'force.password'])->group(function () {
         Route::post('/departments/{id}/restore', [DepartmentController::class, 'restore'])->name('departments.restore');
     });
 
+    // ── Notifications & Real-Time Sync (All Authenticated Users / Drivers) ──
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::get('/api/driver/active-assignment', [NotificationController::class, 'activeAssignment'])->name('driver.activeAssignment');
     // ── Driver Trip Lifecycle ────────────────────────────────────────────────
     Route::middleware('role:driver')->group(function () {
         Route::post('/trips/{booking}/start', [TripLogController::class, 'startTrip'])->name('trips.start');

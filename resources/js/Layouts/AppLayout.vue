@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
+import NotificationBell from '@/Components/NotificationBell.vue';
+import DriverAssignmentAlert from '@/Components/DriverAssignmentAlert.vue';
 import {
     LayoutDashboard,
     CalendarDays,
@@ -84,8 +86,11 @@ const navItems = computed(() => {
         { name: 'Vehicles', href: '/vehicles', icon: Car },
     ];
 
-    if (roleSlug === 'super_admin') {
+    if (roleSlug === 'super_admin' || roleSlug === 'pic') {
         items.push({ name: 'Drivers', href: '/drivers', icon: Users });
+    }
+
+    if (roleSlug === 'super_admin') {
         items.push({ name: 'Users', href: '/admin/users', icon: UserCircle });
         items.push({ name: 'Departments', href: '/admin/departments', icon: Building2 });
     }
@@ -112,6 +117,10 @@ const mobileNavItems = computed(() => {
     }
 
     items.push({ name: 'Vehicles', href: '/vehicles', icon: Car });
+
+    if (roleSlug === 'pic') {
+        items.push({ name: 'Drivers', href: '/drivers', icon: Users });
+    }
 
     if (roleSlug === 'super_admin') {
         items.push({ name: 'Manage', isManage: true, icon: Users });
@@ -290,6 +299,9 @@ const roleBadgeClass = computed(() => {
                 </div>
 
                 <div class="flex items-center gap-1.5">
+                    <!-- Notification Bell -->
+                    <NotificationBell />
+
                     <!-- Theme Toggle -->
                     <button
                         type="button"
@@ -383,6 +395,9 @@ const roleBadgeClass = computed(() => {
             <div v-if="title || $slots.header" class="hidden md:flex h-16 px-8 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                 <h2 class="text-base font-bold text-slate-900 dark:text-white tracking-tight">{{ title }}</h2>
                 <div class="flex items-center gap-3">
+                    <!-- Notification Bell -->
+                    <NotificationBell />
+
                     <button
                         type="button"
                         @click="toggleTheme"
@@ -560,5 +575,8 @@ const roleBadgeClass = computed(() => {
                 </div>
             </transition>
         </nav>
+
+        <!-- Real-Time Driver Pop-Up Alert Modal -->
+        <DriverAssignmentAlert />
     </div>
 </template>

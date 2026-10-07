@@ -26,11 +26,26 @@ class BookingStatusUpdated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        return [
+        $channels = [
             new PrivateChannel('bookings'),
             new PrivateChannel('user.' . $this->booking->employee_id),
-            new PrivateChannel('user.' . $this->booking->manager_id),
         ];
+
+        if ($this->booking->manager_id) {
+            $channels[] = new PrivateChannel('user.' . $this->booking->manager_id);
+        }
+
+        // Broadcast to assigned driver's user channel
+        if ($this->booking->driver_id) {
+            $driverUserId = $this->booking->driver?->user_id
+                ?? \App\Models\Driver::where('id', $this->booking->driver_id)->value('user_id');
+
+            if ($driverUserId) {
+                $channels[] = new PrivateChannel('user.' . $driverUserId);
+            }
+        }
+
+        return $channels;
     }
 
     public function broadcastWith(): array

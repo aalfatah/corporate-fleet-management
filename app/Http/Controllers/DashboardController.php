@@ -43,20 +43,18 @@ class DashboardController extends Controller
 
         } elseif ($roleSlug === 'pic') {
             $stats = [
-                'pending_my_approval' => Booking::forManager($user->id)->pendingApproval()->count(),
-                'approved_by_me'      => Booking::forManager($user->id)->where('status', Booking::STATUS_APPROVED)->count(),
-                'in_progress'         => Booking::forManager($user->id)->where('status', Booking::STATUS_IN_PROGRESS)->count(),
-                'completed'           => Booking::forManager($user->id)->where('status', Booking::STATUS_COMPLETED)->count(),
+                'pending_my_approval' => Booking::pendingApproval()->count(),
+                'approved_by_me'      => Booking::where('status', Booking::STATUS_APPROVED)->count(),
+                'in_progress'         => Booking::where('status', Booking::STATUS_IN_PROGRESS)->count(),
+                'completed'           => Booking::where('status', Booking::STATUS_COMPLETED)->count(),
             ];
 
-            $pendingApprovals = Booking::forManager($user->id)
-                ->pendingApproval()
+            $pendingApprovals = Booking::pendingApproval()
                 ->with(['employee.department', 'vehicle'])
                 ->latest()
                 ->get();
 
-            $activeBookings = Booking::forManager($user->id)
-                ->with(['employee.department', 'vehicle', 'driver.user'])
+            $activeBookings = Booking::with(['employee.department', 'vehicle', 'driver.user'])
                 ->latest()
                 ->take(5)
                 ->get();
