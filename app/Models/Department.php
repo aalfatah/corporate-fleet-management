@@ -12,7 +12,7 @@ class Department extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    protected $fillable = ['name', 'code'];
+    protected $fillable = ['name', 'code', 'description'];
 
     public function users(): HasMany
     {

@@ -17,6 +17,7 @@ import {
     Moon,
     ChevronDown,
     ChevronRight,
+    Building2,
 } from 'lucide-vue-next';
 
 defineProps({
@@ -86,6 +87,7 @@ const navItems = computed(() => {
     if (roleSlug === 'super_admin') {
         items.push({ name: 'Drivers', href: '/drivers', icon: Users });
         items.push({ name: 'Users', href: '/admin/users', icon: UserCircle });
+        items.push({ name: 'Departments', href: '/admin/departments', icon: Building2 });
     }
 
     return items;
@@ -118,9 +120,11 @@ const mobileNavItems = computed(() => {
     return items;
 });
 
-// For "Manage" tab active state: active when on /drivers or /admin/users
+// For "Manage" tab active state: active when on /drivers, /admin/users, or /admin/departments
 const isManageActive = computed(() => {
-    return page.url?.startsWith('/drivers') || page.url?.startsWith('/admin/users');
+    return page.url?.startsWith('/drivers')
+        || page.url?.startsWith('/admin/users')
+        || page.url?.startsWith('/admin/departments');
 });
 
 // Manage bottom sheet (super_admin)
@@ -522,6 +526,22 @@ const roleBadgeClass = computed(() => {
                             <div>
                                 <p class="text-sm font-semibold">Users</p>
                                 <p class="text-[11px] text-slate-400 dark:text-slate-500">Manage system users</p>
+                            </div>
+                            <ChevronRight class="h-4 w-4 ml-auto text-slate-300 dark:text-slate-600" />
+                        </Link>
+
+                        <Link
+                            href="/admin/departments"
+                            @click="showManageSheet = false"
+                            class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-colors"
+                            :class="$page.url.startsWith('/admin/departments') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                        >
+                            <div class="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" :class="$page.url.startsWith('/admin/departments') ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-slate-100 dark:bg-slate-800'">
+                                <Building2 class="h-5 w-5" :class="$page.url.startsWith('/admin/departments') ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'" />
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold">Departments</p>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500">Manage organizational units</p>
                             </div>
                             <ChevronRight class="h-4 w-4 ml-auto text-slate-300 dark:text-slate-600" />
                         </Link>

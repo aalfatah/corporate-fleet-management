@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TripLogController;
@@ -74,13 +75,21 @@ Route::middleware(['auth', 'force.password'])->group(function () {
         Route::delete('/drivers/{driver}', [DriverController::class, 'destroy'])->name('drivers.destroy');
     });
 
-    // ── User Management (Super Admin Only) ───────────────────────────────────
+    // ── Admin (Super Admin Only) ─────────────────────────────────────────────
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
+        // User Management
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+
+        // Department Management
+        Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
+        Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
+        Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
+        Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy');
+        Route::post('/departments/{id}/restore', [DepartmentController::class, 'restore'])->name('departments.restore');
     });
 
     // ── Driver Trip Lifecycle ────────────────────────────────────────────────

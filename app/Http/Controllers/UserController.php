@@ -39,7 +39,7 @@ class UserController extends Controller
         $users = $query->latest()->paginate(15)->withQueryString();
 
         $roles       = Role::orderBy('name')->get(['id', 'name', 'slug']);
-        $departments = Department::orderBy('name')->get(['id', 'name', 'code']);
+        $departments = Department::whereNull('deleted_at')->orderBy('name')->get(['id', 'name', 'code']);
         $managers    = User::whereHas('role', fn ($q) => $q->whereIn('slug', [Role::PIC, Role::SUPER_ADMIN]))
             ->whereNull('deleted_at')
             ->orderBy('name')
