@@ -1,58 +1,154 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Corporate Fleet Management
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A role-based fleet management system for organizations that need to manage vehicle bookings, driver assignments, trip lifecycle tracking, and departmental access control.
 
-## About Laravel
+This project is built with Laravel, Vue 3, Inertia.js, and Vite, and is designed to support internal operations such as booking approvals, vehicle availability checks, and admin management.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Vehicle booking requests and trip lifecycle management
+- Role-based approval flow for PIC and super admin users
+- Driver status tracking from trip start to completion
+- Vehicle and driver management screens
+- Department and user administration
+- Profile and password self-service for authenticated users
+- Dashboard for operational visibility
+- Responsive front-end built with Vue and Tailwind
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tech Stack
 
-## Learning Laravel
+- Laravel 13
+- PHP 8.3
+- Vue 3
+- Inertia.js
+- Vite
+- Tailwind CSS
+- SQLite by default for local development
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Project Structure
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```text
+app/
+  Http/Controllers/      # Business logic and request handling
+  Models/                # Eloquent models
+config/                  # Laravel configuration
+database/
+  migrations/            # Database schema updates
+  seeders/               # Seed data for local setup
+public/                  # Web entrypoint and static assets
+resources/
+  js/                    # Vue/Inertia frontend
+  views/                 # Blade templates
+routes/
+  web.php                # Application routes
+storage/
+  app/                   # Local application storage
+  logs/                  # Logs
+tests/                   # PHPUnit tests
+.env.example             # Example environment configuration
+composer.json            # PHP dependencies and scripts
+package.json             # Frontend dependencies and scripts
+vite.config.js          # Vite configuration
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Roles and Access
 
-## Contributing
+The application includes a permission model based on user roles:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Guest: login access only
+- Authenticated user: can manage profile and access dashboard
+- PIC: can approve or reject bookings
+- Super Admin: manages users, departments, vehicles, and drivers
+- Driver: can start and complete trip logs for assigned bookings
 
-## Code of Conduct
+## Getting Started
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Prerequisites
 
-## Security Vulnerabilities
+- PHP 8.3+
+- Composer
+- Node.js 18+
+- npm
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/aalfatah/corporate-fleet-management.git
+cd corporate-fleet-management
+```
+
+2. Install PHP dependencies
+
+```bash
+composer install
+```
+
+3. Create your environment file
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+4. Configure your database in `.env` if needed
+
+The project includes SQLite as the default local configuration in `.env.example`.
+
+5. Run database migrations
+
+```bash
+php artisan migrate
+```
+
+Optional: seed the database if seeders are available for your environment.
+
+6. Install JavaScript dependencies and build frontend assets
+
+```bash
+npm install
+npm run build
+```
+
+7. Start the local development server
+
+```bash
+php artisan serve
+```
+
+Then open the app in your browser at:
+
+```text
+http://localhost:8000
+```
+
+## Development Commands
+
+Run the Laravel app in development mode:
+
+```bash
+composer run dev
+```
+
+Run tests:
+
+```bash
+php artisan test
+```
+
+Build frontend assets for production:
+
+```bash
+npm run build
+```
+
+## Notes
+
+- This project is intended for internal corporate fleet operations and workflow-based approvals.
+- The default stack is optimized for a Laravel monolith with a Vue-based UI layer.
+- The app can be adapted for additional fleet logic such as maintenance tracking, fuel monitoring, or audit reporting.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License.
